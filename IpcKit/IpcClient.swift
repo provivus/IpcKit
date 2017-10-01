@@ -1145,10 +1145,8 @@ public class IpcClient {
         }
     }
     
-    public func eth_sendRawTransaction(netId: NetworkId,unlockedAccount: Account, address: Address, transaction: Transaction) -> Promise<Hash>
+    public func eth_sendRawTransaction(netId: NetworkId,unlockedAccount: Account, transaction: Transaction) -> Promise<Hash>
     {
-        print("eth_sendRawTransaction")
-        
         return Promise<Hash> { fulfill, reject in
             if transaction.gasLimit.isZero {
                 transaction.gasLimit = BigNumber(decimalString: "350000")
@@ -1172,9 +1170,7 @@ public class IpcClient {
                 .responseJSON { response in
                     switch response.result {
                     case .success:
-                        print("eth_sendRawTransaction",response)
                         let jdata = queryPath(response.data! as NSObject,"json/json") as? NSDictionary
-                        
                         if let result = jdata?["result"] , let hash = Hash.init(hexString: result as! String) {
                             fulfill(hash)
                         } else {
@@ -1337,46 +1333,6 @@ public class IpcClient {
                     print(error)
                 }
             }
-        }
-    }
-    
-    
-    public func waitForTransactionReceipt(netId: NetworkId, hash: Hash) -> Promise<TransactionReceipt>
-    {
-        if hash.isZeroHash() {
-            return Promise(value: TransactionReceipt())
-        }
-        return Promise<TransactionReceipt> { fulfill, reject in
-            Timer.scheduledTimer(withTimeInterval: 5, repeats: true, block: { (timer) in
-                Alamofire.request(networkInterface(netId)[0], method: .post,  parameters: [
-                    "jsonrpc": "2.0" ,
-                    "method": "eth_getTransactionReceipt",
-                    "id": NSNumber(value: 42),
-                    "params": [hash.hexString]
-                    ], encoding: JSONEncoding.default )
-                    .validate()
-                    .responseJSON { response in
-                        switch response.result {
-                        case .success:
-                            let jdata = queryPath(response.data! as NSObject,"json/json") as? NSDictionary
-                            
-                            let result = jdata?["result"]
-                            
-                            if result is NSNull {
-                                print(".")
-                                //reject(NSError.cancelledError())
-                            } else if let transactionReceipt = TransactionReceipt(from: result as! [AnyHashable : Any]) {
-                                if (transactionReceipt.blockNumber)>0 {
-                                    print("waitForTransactionReceipt:",transactionReceipt)
-                                    timer.invalidate()
-                                    fulfill(transactionReceipt)
-                                }
-                            }
-                        case .failure(let error):
-                            reject(error)
-                        }
-                }
-            })
         }
     }
     

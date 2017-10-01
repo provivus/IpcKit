@@ -38,20 +38,17 @@ func networkInterface(_ networkId: NetworkId) -> [String]
     }
 }
 
-class IpcClient {
-    
-    enum BlockTag: Int {
-        case pending = -2
-        case latest = -1
-        case earliest = 0
-    }
+public enum BlockTag: Int {
+    case pending = -2
+    case latest = -1
+    case earliest = 0
+}
+
+public class IpcClient {
     
     var transactionNonce:UInt = 0
-    init?() {
-        do {
-        } catch {
-            print(error.localizedDescription)
-        }
+    
+    public init?() {
     }
 
     func printBody(response: Alamofire.DataResponse<Any>)

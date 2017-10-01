@@ -1339,4 +1339,45 @@ public class IpcClient {
             }
         }
     }
+    
+    
+    public func waitForTransactionReceipt(netId: NetworkId, hash: Hash) -> Promise<TransactionReceipt>
+    {
+        if hash.isZeroHash() {
+            return Promise(value: TransactionReceipt())
+        }
+        return Promise<TransactionReceipt> { fulfill, reject in
+            Timer.scheduledTimer(withTimeInterval: 5, repeats: true, block: { (timer) in
+                Alamofire.request(networkInterface(netId)[0], method: .post,  parameters: [
+                    "jsonrpc": "2.0" ,
+                    "method": "eth_getTransactionReceipt",
+                    "id": NSNumber(value: 42),
+                    "params": [hash.hexString]
+                    ], encoding: JSONEncoding.default )
+                    .validate()
+                    .responseJSON { response in
+                        switch response.result {
+                        case .success:
+                            let jdata = queryPath(response.data! as NSObject,"json/json") as? NSDictionary
+                            
+                            let result = jdata?["result"]
+                            
+                            if result is NSNull {
+                                print(".")
+                                //reject(NSError.cancelledError())
+                            } else if let transactionReceipt = TransactionReceipt(from: result as! [AnyHashable : Any]) {
+                                if (transactionReceipt.blockNumber)>0 {
+                                    print("waitForTransactionReceipt:",transactionReceipt)
+                                    timer.invalidate()
+                                    fulfill(transactionReceipt)
+                                }
+                            }
+                        case .failure(let error):
+                            reject(error)
+                        }
+                }
+            })
+        }
+    }
+    
 }

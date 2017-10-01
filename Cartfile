@@ -1,3 +1,7 @@
 github "mxcl/PromiseKit" ~> 4.0
 github "Alamofire/Alamofire" ~> 4.4
 github "PromiseKit/Alamofire-" ~> 1.0
+github "provivus/EtherKit" "master"
+github "provivus/ABIKit" "master"
+github "hkellaway/Gloss"
+

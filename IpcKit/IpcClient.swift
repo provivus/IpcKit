@@ -17,7 +17,13 @@ public enum NetworkId: UInt {
     case Local = 0xff
 }
 
-func networkInterface(_ networkId: NetworkId) -> [String]
+public enum BlockTag: Int {
+    case pending = -2
+    case latest = -1
+    case earliest = 0
+}
+
+public func networkInterface(_ networkId: NetworkId) -> [String]
 {
     switch (networkId)
     {
@@ -38,11 +44,6 @@ func networkInterface(_ networkId: NetworkId) -> [String]
     }
 }
 
-public enum BlockTag: Int {
-    case pending = -2
-    case latest = -1
-    case earliest = 0
-}
 
 public class IpcClient {
     

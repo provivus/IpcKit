@@ -1174,6 +1174,7 @@ public class IpcClient {
                         if let result = jdata?["result"] , let hash = Hash.init(hexString: result as! String) {
                             fulfill(hash)
                         } else {
+                            print("response:",response)
                             let err = NSError(domain: "XClaim", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not send transaction"])
                                 reject(err)
                         }
